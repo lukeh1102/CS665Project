@@ -1,6 +1,6 @@
 # Library Service
 
-Member(MemberId, Name, HasCheckedOut)  
+Member(MemberId, Name, CanCheckOut, Birthday)  
 Book(ItemID, Title, Author, Checkout)  
 Movie(ItemID, Title, Director, CheckedOut)  
 CheckedOutList(Title, ItemID, ReturnData, CheckedOutBy)  
