@@ -1,77 +1,72 @@
-# Library Service
+# **Library Management System**
+Our database is modeled after a library management system, this system tracks the card holding members,  
+what books the library has, book checkout history, and a waiting list.
 
-Member(MemberId, Name, CanCheckOut, Birthday)  
-Book(ItemID, Title, Author, Checkout)  
-Movie(ItemID, Title, Director, CheckedOut)  
-CheckedOutList(Title, ItemID, ReturnData, CheckedOutBy)  
+With this application you can:  
+- Add and remove members or books from the system
+- Checkout and return books
+- Manage waitlist
+- Search for books
+        
+
+# Relations
+Members(MemberID, Name, Address, Birthday)  
+Books(BookID, Title, Author, IsCheckedOut)  
+CheckoutList(CheckoutID, BookID, MemberID, DateCheckedOut, ReturnDate)  
+Waitlist(RequestID, BookID, MemberID, DateRequested)
 
 # Tables - Examples
-| Member     | 
-|------------|
+## Members
+| MemberID |       Name        |   Address    |  Birthday  |
+| :------: | :---------------: | :----------: | :--------: |
+| F837M338 | Jennifer Siviseth | 111 Rocky Rd | 01/19/2001 |
+| B843K735 |    Luke Walker    | 123 Easy St  | 11/02/2001 |
 
-MemberID: F837M338, B843A735  
-Name: Jennifer Siviseth, LuKe Walker  
-CanCheckOut: True, False   
-Birthday: 01/19/2001, 01/20/2001
+## Books
+| BookID |       Title       |       Author        |  Genre  |
+| :----: | :---------------: | :-----------------: | :-----: |
+|  B123  | Lord of The Rings |    J.R.R Tolkien    | Fantasy |
+|  B456  |      Eragon       | Chirstopher Paolini | Fantasy |
 
-| Book       | 
-|------------|
 
-BookID: B1, B2  
-BookTitle: Narnia, Harry Potter  
-Author: John Doe, Spongebob Squarepants  
-BookCheckedOut: True, False 
+## CheckoutList
+| CheckoutID | BookID | MemberID | ReturnDate |
+| :--------: | :----- | :------: | :--------: |
+|   C20576   | B123   | F234J457 | 11/29/2022 |
+|   C67219   | B456   | B843K735 | 11/23/2022 |
 
-| Movie      | 
-|------------|
-
-MovieID: M1, M2  
-MovieTitle: John Wick, Matrix  
-Director: Patrick Star, Mary Lee  
-MovieCheckedOut: True, False
-
-| CheckedOutList| 
-|------------|
-
-ItemID: B1, M1  
-Title: Matrix, Narnia   
-ReturnDate: 06/22/2023, 07/13/2023  
-CheckedOutBy: Jennifer Siviseth, Luke Walker  
+## Waitlist
+| RequestID |    Title    | MemberID | DateRequested |
+| :-------: | :---------: | :------: | :-----------: |
+|  R11111   | Animal Farm | A924Y539 |  11/17/2022   |
+|  R22222   | Enders Game   | G347T259 |  11/23/2022   |
+ 
 
 # FD's
-Member 
-- 
-MemberID->Name  
-MamberID->CanCheckOut  
-MemberID->Birthday  
-
-Book
--
-BookID->BookTitle  
-BookID->Author  
-BookID->BookCheckedOut  
-
-Movie  
--
-MovieID->MovieTitle  
-MovieID->Director  
-MovieID->MovieCheckedOut  
-
-CheckedOutList  
--
-ItemID->Title  
-ItemID->ReturnDate  
-ItemID->CheckedOutBy
+## Members 
+    MemberID->Name  
+    MamberID->Address  
+    MemberID->Birthday  
+## Books
+    BookID->Title  
+    BookID->Author  
+    BookID->Genre 
+## CheckoutList  
+    CheckoutID->BookID
+    CheckoutID->MemberID
+    CheckoutID->ReturnDate
+## Waitlist
+    RequestID->BookID
+    RequestID->MemberID
+    RequestID->DateRequested
 
 # Keys
-Primary Keys  
--
-* MemberID  
-* BookID  
-* MovieID  
-* ItemID  
+## Primary Keys  
+    MemberID  
+    BookID  
+    CheckoutID  
+    RequestID
 
-Foreign Keys/ Constraints
--
-ItemID->[MovieID,BookID]  
-CheckedOutBy->MemberID
+## Foreign Keys/Constraints  
+    ItemID->[MovieID,BookID]  
+    CheckedOutBy->MemberID
