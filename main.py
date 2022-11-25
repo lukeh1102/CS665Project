@@ -93,8 +93,6 @@ def displayCheckedout():
 
     dueDateLabel = ttk.Label(root, text="Due Date", anchor="center")
     dueDateLabel.place(relx=0.8, rely=0.05, relwidth=0.2, relheight=0.05)
-    
-
 
     #display all checked out books
     y=0
@@ -122,7 +120,204 @@ def displayCheckedout():
         #Anytime youre using a scrollable body, you need to call update() for the widgets to appear
         scrollableBody.update()
 
+def searchMember():
 
+    def searchClicked():
+
+        #if entry is empty ask for entry
+        if searchMemberEntry.get() == "":
+            return
+
+        #join members, fines, and checkouts tables to get name, address, birthday, books, duedate, and fines
+        c.execute("""SELECT members.Name, members.Address, members.Birthday, checkouts.Book, checkouts.Returndate, fines.FineAmount 
+        FROM members LEFT JOIN checkouts ON members.MemberID = checkouts.CheckedoutBy 
+        LEFT JOIN fines ON members.MemberID = fines.IssuedTo 
+        WHERE members.MemberID = ?""", (searchMemberEntry.get(),))
+        memberInfo = c.fetchall()
+        print(memberInfo)
+
+        # if member is not found, display error message
+        if memberInfo == None:
+            return
+
+        # update entry with member info
+        # make entry modifable again
+        memberNameEntry.config(state="normal")
+        # clear entry
+        memberNameEntry.delete(0, tk.END)
+        # insert new text
+        memberNameEntry.insert(0, memberInfo[0][0])
+        # make entry unmodifable
+        memberNameEntry.config(state="readonly")
+
+        memberAddressEntry.config(state="normal")
+        memberAddressEntry.delete(0, tk.END)
+        memberAddressEntry.insert(0, memberInfo[0][1])
+        memberAddressEntry.config(state="readonly")
+
+        memberBirthdayEntry.config(state="normal")
+        memberBirthdayEntry.delete(0, tk.END)
+        memberBirthdayEntry.insert(0, memberInfo[0][2])
+        memberBirthdayEntry.config(state="readonly")
+
+        #add up all the fines
+        totalFines = 0
+        for row in memberInfo:
+            if row[5] != None:
+                totalFines += row[5]
+        
+        fineLabel.config(text="Unpaid Fine Amount: $" + str(totalFines))
+
+        #list books checked out
+        checkedOutBooks = ""
+        bookCheckedOut = False
+        for row in memberInfo:
+            if row[3] != None:
+                bookCheckedOut = True
+                checkedOutBooks += row[3] + " Due: " + str(row[4]) + ", "
+        
+        if bookCheckedOut == True:
+            booksLabel.config(text="Checked Out Books: " + checkedOutBooks)
+        else:
+            booksLabel.config(text="Checked Out Books: None")
+
+        # make edit button clickable
+        editButton.config(state="normal")
+
+    def editClicked():
+
+        def cancelClicked():
+        
+            #clear entry boxs
+            memberNameEntry.delete(0, tk.END)
+            memberAddressEntry.delete(0, tk.END)
+            memberBirthdayEntry.delete(0, tk.END)
+
+            #set old values back
+            memberNameEntry.insert(0, oldName)
+            memberAddressEntry.insert(0, oldAddress)
+            memberBirthdayEntry.insert(0, oldBirthday)
+
+            #make entries unmodifable
+            memberNameEntry.config(state="readonly")
+            memberAddressEntry.config(state="readonly")
+            memberBirthdayEntry.config(state="readonly")
+
+            #make search entry modifable
+            searchMemberEntry.config(state="normal")
+
+            #make save and cancel buttons unclickable
+            saveButton.config(state="disabled")
+            cancelButton.config(state="disabled")
+
+
+
+        #make save button clickable
+        saveButton.config(state="normal")
+
+        #make cancel button clickable
+        cancelButton.config(state="normal")
+        cancelButton.config(command=cancelClicked)
+
+        #make search entry unmodifable
+        searchMemberEntry.config(state="readonly")
+
+        #make entries modifable
+        memberNameEntry.config(state="normal")
+        memberAddressEntry.config(state="normal")
+        memberBirthdayEntry.config(state="normal")
+
+        #save old values
+        oldName = memberNameEntry.get()
+        oldAddress = memberAddressEntry.get()
+        oldBirthday = memberBirthdayEntry.get()
+
+
+    def saveClicked():
+        
+        # get values
+        memberID = searchMemberEntry.get()
+        newName = memberNameEntry.get()
+        newAddress = memberAddressEntry.get()
+        newBirthday = memberBirthdayEntry.get()
+
+        #update member info
+        c.execute("""UPDATE members SET Name = ?, Address = ?, Birthday = ? 
+        WHERE MemberID = ?""", (newName, newAddress, newBirthday, memberID))
+        conn.commit()
+
+        #make entry unmodifable
+        memberNameEntry.config(state="readonly")
+        memberAddressEntry.config(state="readonly")
+        memberBirthdayEntry.config(state="readonly")
+
+        #make search entry modifable
+        searchMemberEntry.config(state="normal")
+
+        #make buttons unclickable
+        saveButton.config(state="disabled")
+        cancelButton.config(state="disabled")
+
+    
+
+
+    #create new window
+    searchMemberWindow = tk.Toplevel(root)
+    searchMemberWindow.resizable(False, False)
+    searchMemberWindow.title("Search Member")
+    searchMemberWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
+
+    #create widgets
+
+    searchMemberLabel = ttk.Label(searchMemberWindow, text="MemberID:", anchor="w")
+    searchMemberLabel.place(relx=0.1, rely=0.04, relwidth=1, relheight=0.05)
+
+    searchMemberEntry = ttk.Entry(searchMemberWindow)
+    searchMemberEntry.place(relx=0.1, rely=0.1, relwidth=0.6, relheight=0.1)
+
+    #widgets to display member info
+
+    memberNameLabel = ttk.Label(searchMemberWindow, text="Name:", anchor="sw")
+    memberNameLabel.place(relx=0.1, rely=0.27, relwidth=0.2, relheight=0.05)
+
+    memberNameEntry = ttk.Entry(searchMemberWindow)
+    memberNameEntry.place(relx=0.23, rely=0.25, relwidth=0.67, relheight=0.1)
+    memberNameEntry.config(state="readonly")
+
+    memberAddressLabel = ttk.Label(searchMemberWindow, text="Address:", anchor="sw")
+    memberAddressLabel.place(relx=0.1, rely=0.39, relwidth=0.2, relheight=0.05)
+
+    memberAddressEntry = ttk.Entry(searchMemberWindow)
+    memberAddressEntry.place(relx=0.23, rely=0.37, relwidth=0.67, relheight=0.1)
+    memberAddressEntry.config(state="readonly")
+
+    memberBirthdayLabel = ttk.Label(searchMemberWindow, text="Birthday:", anchor="sw")
+    memberBirthdayLabel.place(relx=0.1, rely=0.51, relwidth=0.2, relheight=0.05)
+
+    memberBirthdayEntry = ttk.Entry(searchMemberWindow)
+    memberBirthdayEntry.place(relx=0.23, rely=0.49, relwidth=0.67, relheight=0.1)
+    memberBirthdayEntry.config(state="readonly")
+
+
+    fineLabel = ttk.Label(searchMemberWindow, text="Unpaid Fine Amount:", anchor="w")
+    fineLabel.place(relx=0.1, rely=0.7, relwidth=0.8, relheight=0.1)
+
+    booksLabel = ttk.Label(searchMemberWindow, text="Books Checked Out:", anchor="nw")
+    booksLabel.place(relx=0.1, rely=0.78, relwidth=0.8, relheight=0.2)
+
+    #buttons
+
+    searchMemberButton = ttk.Button(searchMemberWindow, text="Search", command=searchClicked, takefocus=False)
+    searchMemberButton.place(relx=0.75, rely=0.1, relwidth=0.15, relheight=0.1)
+
+    editButton = ttk.Button(searchMemberWindow, text="Edit", command=editClicked, takefocus=False, state="disabled")
+    editButton.place(relx=0.23, rely=0.6, relwidth=0.15, relheight=0.1)
+
+    saveButton = ttk.Button(searchMemberWindow, text="Update", command=saveClicked, takefocus=False, state="disabled")
+    saveButton.place(relx=0.40, rely=0.6, relwidth=0.15, relheight=0.1)
+
+    cancelButton = ttk.Button(searchMemberWindow, text="Cancel", takefocus=False, state="disabled")
+    cancelButton.place(relx=0.57, rely=0.6, relwidth=0.15, relheight=0.1)
 
 def addItem():
 
@@ -133,12 +328,6 @@ def addItem():
             widget.config(text="")
 
         def addToDB():
-            pass
-            # TODO
-            # Here is where the sql commands would go to add the item to the database
-            # Commands would need to depend on radio button selection
-            # Need to add error handling for if the user doesn't enter a value or value is already in db
-            # ItemID(M### or B###) and MemberID(U###) should be auto generated
 
             if selectedItem.get() == 1:
                 # add member
@@ -342,19 +531,23 @@ checkoutBookButton.place(relx = 0.05, rely = 0.25, relwidth=BUTTON_REL_WIDTH, re
 returnBookButton = ttk.Button(root, text="Return Item", takefocus=False)
 returnBookButton.place(relx = 0.05, rely = 0.35, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
-
 # Display all checked out books
 s = ttk.Style()
 s.configure('my.TButton', font=("TkDefaultFont", 8))
 displayCheckedoutButton = ttk.Button(root, text="Checked Out List", command=displayCheckedout, style='my.TButton', takefocus=False)
 displayCheckedoutButton.place(relx = 0.05, rely = 0.45, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
+# Search Member button
+searchMemberButton = ttk.Button(root, text="Search Member", takefocus=False, command=searchMember)
+searchMemberButton.place(relx = 0.05, rely = 0.55, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
+
+
 
 
 #TODO 
 # Buttons for searching for items
 # Buttons for other pre-defined queries
-# A frame that will display tables and search results
+# Buttons for filling table
 
 
 
