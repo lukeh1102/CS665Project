@@ -31,9 +31,6 @@ checkouts(
     CheckoutID integer PRIMARY KEY AUTOINCREMENT,
     CheckedoutBy integer NOT NULL,
     Book integer NOT NULL,
-    CheckoutDate date NOT NULL,
+    ReturnDate date NOT NULL,
     FOREIGN KEY (CheckedoutBy) REFERENCES members(MemberID),
     FOREIGN KEY (Book) REFERENCES books(BookID))""")
-
-
-    
