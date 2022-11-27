@@ -4,7 +4,7 @@
 # Members
 Luke Walker [lukeh1102](https://github.com/lukeh1102) #112201048  
 Jennifer Siviseth [JennSiviseth](https://github.com/JennSiviseth) #113370417  
-Britton MacLaughlin 
+Britton MacLaughlin [bmaak](https://github.com/bmaak) #89565884
 
 # Youtbe Demo
 

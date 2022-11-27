@@ -535,6 +535,90 @@ def addItem():
     movieRB = ttk.Radiobutton(radioButtonFrame, text="Fine", variable=selectedItem, value=3, command=renderAddItemWindow)
     movieRB.place(relx=0.7, rely=0.1, relwidth=0.2, relheight=0.8)
 
+#def checkout
+#checkout window (book)
+#book checkout window
+#book ID, member ID, return date (auto generated)
+
+def checkOut():
+    
+    def clearMessage(widget):
+        time.sleep(3)
+        widget.config(text="")
+
+    def addToDB():
+
+        member = memberEntry.get()
+        bookID = bookIDEntry.get()
+        returnDate = datetime.datetime.now() + datetime.timedelta(days=14)
+
+        if bookID == "" or member == "":
+            confirmLabel.config(text="Please fill out all fields")
+        else:
+            #check if book is already checked out
+            c.execute("SELECT * FROM checkouts WHERE Book = ?", (bookID,))
+            result = c.fetchall()
+            if len(result) > 0:
+                confirmLabel.config(text="Book is already checked out")
+                return
+
+            #check if book exists
+            c.execute("SELECT * FROM books WHERE BookID = ?", (bookID,))
+            result = c.fetchall()
+            if len(result) == 0:
+                confirmLabel.config(text="Book does not exist")
+                return
+
+            #check if member exists
+            c.execute("SELECT * FROM members WHERE MemberID = ?", (member,))
+            result = c.fetchall()
+            if len(result) == 0:
+                confirmLabel.config(text="Member does not exist")
+                return
+
+            #insert entry
+            c.execute("INSERT INTO checkouts (CheckedoutBy, Book, ReturnDate) VALUES (?, ?, ?)", (member, bookID, returnDate))
+            conn.commit()
+                    
+            #provide user with a message to confirm entry
+            confirmLabel.config(text="Book checked out successfully")
+            #clear message after 3 seconds, needed to open a new thread to count while the GUI still runs
+            t = threading.Thread(target=clearMessage, args=(confirmLabel,))
+            t.start()
+
+            #clear entries
+            memberEntry.delete(0, 'end')
+            bookIDEntry.delete(0, 'end')
+            returnDate.delete(0, 'end')
+
+    checkOutWindow = tk.Toplevel(root)
+    checkOutWindow.title("Check Out Book")
+    checkOutWindow.resizable(False, False)
+    checkOutWindow.grab_set()
+    x = (screenWidth/2) - (NEW_WINDOW_WIDTH/2)
+    y = (screenHeight/2) - (NEW_WINDOW_HEIGHT/2)
+    checkOutWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
+
+    renderFrame = ttk.Frame(checkOutWindow)
+    renderFrame.place(relx=0, rely=0.1, anchor="nw", relwidth=1, relheight=0.9)
+
+    bookIDLabel = ttk.Label(renderFrame, text="Book ID:", foreground="black", anchor="w")
+    bookIDLabel.place(relx=0.05, rely=0, relwidth=1, relheight=0.1)
+
+    bookIDEntry = ttk.Entry(renderFrame)
+    bookIDEntry.place(relx = 0.05, rely = 0.1, relwidth = 0.8, relheight = 0.15)
+
+    memberLabel = ttk.Label(renderFrame, text="Member ID:", foreground="black", anchor="w")
+    memberLabel.place(relx=0.05, rely=0.25, relwidth=1, relheight=0.1)
+
+    memberEntry = ttk.Entry(renderFrame)
+    memberEntry.place(relx = 0.05, rely = 0.35, relwidth = 0.8, relheight = 0.15)
+
+    addButton = ttk.Button(renderFrame, text="Add", command=addToDB)
+    addButton.place(relx=0.4, rely=0.85, relwidth=0.2, relheight=0.1)
+
+    confirmLabel = ttk.Label(renderFrame, text="")
+    confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
 
 
 # Add item button
@@ -546,7 +630,7 @@ deleteItemButton = ttk.Button(root, text="Delete Item", takefocus=False)
 deleteItemButton.place(relx = 0.05, rely = 0.15, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Checkout book button
-checkoutBookButton = ttk.Button(root, text="Checkout Item", takefocus=False)
+checkoutBookButton = ttk.Button(root, text="Checkout Item", command=checkOut, takefocus=False)
 checkoutBookButton.place(relx = 0.05, rely = 0.25, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Return book button
