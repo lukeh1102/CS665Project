@@ -70,7 +70,7 @@ class Scrollable(ttk.Frame):
 
 # Button Functions
 def displayCheckedout():
-    scrollableBody = Scrollable(tableBody)
+
 
     #join checkouts, members, and books tables to get checkout info
     c.execute("""SELECT checkouts.CheckoutID, checkouts.Book, books.Title, books.Author, checkouts.ReturnDate, members.Name, checkouts.CheckedoutBy   
@@ -84,10 +84,14 @@ def displayCheckedout():
     style.configure("white.TLabel", background="white")
 
     #display header
-    headerLabel = ttk.Label(root, text="Checked Out Books", anchor="center", font=("TkDefaultFont", 16))
-    headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.05)
+    headerLabel.config(text="Checked Out Books")
 
-     #display table headers
+    #delete old widgets in scrollableBody
+    for widget in scrollableBody.winfo_children():
+        widget.destroy()
+    scrollableBody.update()
+
+    #display table headers
     checkoutIDLabel = ttk.Label(scrollableBody, text="Checkout ID", anchor="center", style="white.TLabel")
     # #checkoutIDLabel.place(relx=0.2, rely=0.05, relwidth=0.1, relheight=0.05)
     checkoutIDLabel.grid(row=0, column=0)
@@ -424,7 +428,7 @@ def addItem():
                 # add fine
                 newIssuedTo = issueEntry.get()
                 newFineAmount = amountEntry.get()
-                newDateIssued = datetime.datetime.now().strftime("%Y-%m-%d")
+                newDateIssued = datetime.datetime.now().strftime("%m/%d/%Y")
 
                 confirmLabel = ttk.Label(addItemWindow, text="")
                 confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
@@ -466,9 +470,12 @@ def addItem():
         for widget in renderFrame.winfo_children():
             widget.destroy()
 
+            style = ttk.Style()
+            style.configure("white.TLabel", background="white")
+
         if selectedItem.get() == 1:
 
-            nameLabel = ttk.Label(renderFrame, text="Name:", foreground="black", anchor="w")
+            nameLabel = ttk.Label(renderFrame, text="Name:", foreground="black", anchor="w", style="white.TLabel")
             nameLabel.place(relx=0.05, rely=0, relwidth=1, relheight=0.1)
 
             nameEntry = ttk.Entry(renderFrame)
@@ -552,7 +559,7 @@ def addItem():
 #checkout window (book)
 #book ID, member ID, return date (auto generated)
 
-def checkOut():
+def checkoutBook():
     
     def clearMessage(widget):
         time.sleep(3)
@@ -562,7 +569,10 @@ def checkOut():
 
         member = memberEntry.get()
         bookID = bookIDEntry.get()
+        #get date two weeks from now m/d/Y format
         returnDate = datetime.datetime.now() + datetime.timedelta(days=14)
+        returnDate = returnDate.strftime("%m/%d/%Y")
+
 
         if bookID == "" or member == "":
             confirmLabel.config(text="Please fill out all fields")
@@ -692,7 +702,11 @@ def returnItem():
 
 s=ttk.Style().configure("TFrame", background="white")
 tableBody = ttk.Frame(root, style="TFrame")
-tableBody.place(relx=0.2, rely=0.05, relwidth=0.75, relheight=0.90)
+tableBody.place(relx=0.2, rely=0.05, relwidth=0.8, relheight=1)
+scrollableBody = Scrollable(tableBody)
+
+headerLabel = ttk.Label(root, text="Checked Out Books", anchor="center", font=("TkDefaultFont", 16), style="white.TLabel")
+headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.055)
 
 # Add item button
 addItemButton = ttk.Button(root, text="Add Item", command=addItem, takefocus=False)
@@ -703,11 +717,11 @@ deleteItemButton = ttk.Button(root, text="Delete Item", takefocus=False)
 deleteItemButton.place(relx = 0.05, rely = 0.15, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Checkout book button
-checkoutBookButton = ttk.Button(root, text="Checkout Item", command=checkOut, takefocus=False)
+checkoutBookButton = ttk.Button(root, text="Checkout Book", command=checkoutBook, takefocus=False)
 checkoutBookButton.place(relx = 0.05, rely = 0.25, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Return book button
-returnBookButton = ttk.Button(root, text="Return Item", command=returnItem, takefocus=False)
+returnBookButton = ttk.Button(root, text="Return Book", command=returnItem, takefocus=False)
 returnBookButton.place(relx = 0.05, rely = 0.35, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Display all checked out books
