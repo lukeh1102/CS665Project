@@ -70,7 +70,7 @@ class Scrollable(ttk.Frame):
 
 # Button Functions
 def displayCheckedout():
-    scrollableBody = Scrollable(tableBody)
+
 
     #join checkouts, members, and books tables to get checkout info
     c.execute("""SELECT checkouts.CheckoutID, checkouts.Book, books.Title, books.Author, checkouts.ReturnDate, members.Name, checkouts.CheckedoutBy   
@@ -84,10 +84,14 @@ def displayCheckedout():
     style.configure("white.TLabel", background="white")
 
     #display header
-    headerLabel = ttk.Label(root, text="Checked Out Books", anchor="center", font=("TkDefaultFont", 16))
-    headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.05)
+    headerLabel.config(text="Checked Out Books")
 
-     #display table headers
+    #delete old widgets in scrollableBody
+    for widget in scrollableBody.winfo_children():
+        widget.destroy()
+    scrollableBody.update()
+
+    #display table headers
     checkoutIDLabel = ttk.Label(scrollableBody, text="Checkout ID", anchor="center", style="white.TLabel")
     # #checkoutIDLabel.place(relx=0.2, rely=0.05, relwidth=0.1, relheight=0.05)
     checkoutIDLabel.grid(row=0, column=0)
@@ -154,6 +158,166 @@ def displayCheckedout():
         scrollableBody.update()
 
         y+=1
+        
+def searchBook():
+
+    def searchClicked():
+
+        #if entry is empty ask for entry
+        if searchBookEntry.get() == "":
+            return
+
+        #join books, authors, and genres tables to get book, title, author, and genre
+        c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, authors.Name, genres.GenreName
+        FROM books 
+        INNER JOIN authors ON books.Author = authors.AuthorID
+        INNER JOIN genres ON books.Genre = genres.GenreID
+        WHERE books.Title LIKE ?""", (searchBookEntry.get(),))
+        bookInfo = c.fetchall()
+
+        #if book is not found, display error message
+        if bookInfo == None:
+            return
+
+        #update entry with book info
+        #make entry modifiable again
+        bookTitleEntry.config(state="normal")
+        #clear entry
+        bookTitleEntry.delete(0, tk.END)
+        #insert new text
+        bookTitleEntry.insert(0, bookInfo[0][0])
+        #make entry unmodifiable
+        bookTitleEntry.config(state="readonly")
+
+        bookAuthorEntry.config(state="normal")
+        bookAuthorEntry.delete(0, tk.END)
+        bookAuthorEntry.insert(0, bookInfo[0][1])
+        bookAuthorEntry.config(state="readonly")
+
+        bookGenreEntry.config(state="normal")
+        bookGenreEntry.delete(0, tk.END)
+        bookGenreEntry.insert(0, bookInfo[0][2])
+        bookGenreEntry.config(state="readonly")
+
+        #make edit button clickable
+        editButton.config(state="normal")
+
+    def editClicked():
+
+        def cancelClicked():
+            bookTitleEntry.delete(0,tk.END)
+            bookAuthorEntry.delete(0,tk.END)
+            bookGenreEntry.delete(0,tk.END)
+
+            #set old values back
+            bookTitleEntry.insert(0, oldTitle)
+            bookAuthorEntry.insert(0, oldAuthor)
+            bookGenreEntry.insert(0, oldGenre)
+
+            #make entries unmodifiable
+            bookTitleEntry.config(state="readonly")
+            bookAuthorEntry.config(state="readonly")
+            bookGenreEntry.config(state="readonly")
+
+            #make search entry modifiable
+            searchBookEntry.confi(state="normal")
+                
+            #make save and cancel buttons unclickable
+            saveButton.config(state="disabled")
+            cancelButton.config(state="disabled")
+
+        #make save button clickable
+        saveButton.config(state="normal")
+
+        #make cancel button clickable
+        cancelButton.config(state="normal")
+        cancelButton.config(command=cancelClicked)
+
+        #make entries unmodifiable
+        searchBookEntry.confid(state="readonly")
+
+        #make entries modifiable
+        bookTitleEntry.config(state="normal")
+        bookAuthorEntry.config(state="normal")
+        bookGenreEntry.config(state="normal")
+
+        #save old values
+        oldTitle = bookTitleEntry.get()
+        oldAuthor = bookAuthorEntry.get()
+        oldGenre = bookGenreEntry.get()
+
+    def saveClicked():
+
+        #get values
+        bookID = searchBookEntry.get()
+        newTitle = bookTitleEntry.get()
+        newAuthor = bookAuthorEntry.get()
+        newGenre = bookGenreEntry.get()
+
+        #update book info
+        c.execute("""UPDATE books SET Title = ?, Author = ?, Genre = ? WHERE BookID = ?""", (newTitle, newAuthor, newGenre, bookID))
+        conn.commit()
+
+        #make entries unmodifiable
+        bookTitleEntry.config(state="readonly")
+        bookAuthorEntry.config(state="readonly")
+        bookGenreEntry.config(state="readonly")
+
+        #make search entry modifiable
+        searchBookEntry.config(state="normal")
+
+        #make save and cancel buttons unclickable
+        saveButton.config(state="disabled")
+        cancelButton.config(state="disabled")
+
+    #create new window
+    searchBookWindow = tk.Toplevel(root)
+    searchBookWindow.resiazable(False, False)
+    searchBookWindow.title("Search Book")
+    searchBookWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
+
+    #create widgets
+    searchBookLabel = ttk.Label(searchBookWindow, text="BookID:", anchor="w")
+    searchBookLabel.place(relx=0.1, rely=0.04, relwidth=1, relheight=0.05)
+
+    searchBookEntry = ttk.Entry(searchBookWindow)
+    searchBookEntry.place(relx=0.1, rely=0.1, relwdith=0.6, relheight=0.1)
+
+    #widgets to display book info
+    bookTitleLabel = ttk.Label(searchBookWindow, text="Title:", anchor="sw")
+    bookTitleLabel.place(relx=0.1, rely=0.27, relwdith=0.2, relheight=0.05)
+
+    bookTitleEntry = ttk.Entry(searchBookWindow)
+    bookTitleEntry.place(relx=0.23, rely=0.25, relwidth=0.67, relheight=0.1)
+    bookTitleEntry.config(state="readonly")
+
+    bookAuthorLabel = ttk.Label(searchBookWindow, text="Author:", anchor="sw")
+    bookAuthorLabel.place(relx=0.1, rely=0.39, relwdith=0.2, relheight=0.05)
+
+    bookAuthorEntry = ttk.Entry(searchBookWindow)
+    bookAuthorEntry.place(relx=0.23, rely=0.37, relwidth=0.67, relheight=0.1)
+    bookAuthorEntry.config(state="readonly")
+
+    bookGenreLabel = ttk.Label(searchBookWindow, text="Genre:", anchor="sw")
+    bookGenreLabel.place(relx=0.1, rely=0.51, relwdith=0.2, relheight=0.05)
+
+    bookGenreEntry = ttk.Entry(searchBookWindow)
+    bookGenreEntry.place(relx=0.23, rely=0.49, relwidth=0.67, relheight=0.1)
+    bookGenreEntry.config(state="readonly")
+
+    #buttons
+    searchBookButton = ttk.Button(searchBookWindow, text="Search", command=searchClicked, takefocus=False)
+    searchBookButton.place(relx=0.75, rely=0.1, relwidth=0.15, relheight=0.1)
+
+    editButton = ttk.Button(searchBookWindow, text="Edit", command=editClicked, takefoux=False, state="disabled")
+    editButton.place(relx=0.23, rely=0.6, relwidth=0.15, relheight=0.1)
+
+    saveButton = ttk.Button(searchBookWindow, text="Save", command=editClicked, takefoux=False, state="disabled")
+    saveButton.place(relx=0.40, rely=0.6, relwidth=0.15, relheight=0.1)
+
+    cancelButton = ttk.Button(searchBookWindow, text="Cancel", takefocus=False, state="disabled")
+    cancelButton.place(relx=0.57, rely=0.6, relwidth=0.15, relheight=0.1)
+
 
 def searchMember():
 
@@ -559,7 +723,7 @@ def addItem():
                 # add fine
                 newIssuedTo = issueEntry.get()
                 newFineAmount = amountEntry.get()
-                newDateIssued = datetime.datetime.now().strftime("%Y-%m-%d")
+                newDateIssued = datetime.datetime.now().strftime("%m/%d/%Y")
 
                 confirmLabel = ttk.Label(addItemWindow, text="")
                 confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
@@ -601,9 +765,12 @@ def addItem():
         for widget in renderFrame.winfo_children():
             widget.destroy()
 
+            style = ttk.Style()
+            style.configure("white.TLabel", background="white")
+
         if selectedItem.get() == 1:
 
-            nameLabel = ttk.Label(renderFrame, text="Name:", foreground="black", anchor="w")
+            nameLabel = ttk.Label(renderFrame, text="Name:", foreground="black", anchor="w", style="white.TLabel")
             nameLabel.place(relx=0.05, rely=0, relwidth=1, relheight=0.1)
 
             nameEntry = ttk.Entry(renderFrame)
@@ -686,7 +853,7 @@ def addItem():
 #checkout window (book)
 #book ID, member ID, return date (auto generated)
 
-def checkOut():
+def checkoutBook():
     
     def clearMessage(widget):
         time.sleep(3)
@@ -696,7 +863,10 @@ def checkOut():
 
         member = memberEntry.get()
         bookID = bookIDEntry.get()
+        #get date two weeks from now m/d/Y format
         returnDate = datetime.datetime.now() + datetime.timedelta(days=14)
+        returnDate = returnDate.strftime("%m/%d/%Y")
+
 
         if bookID == "" or member == "":
             confirmLabel.config(text="Please fill out all fields")
@@ -826,7 +996,11 @@ def returnItem():
 
 s=ttk.Style().configure("TFrame", background="white")
 tableBody = ttk.Frame(root, style="TFrame")
-tableBody.place(relx=0.2, rely=0.05, relwidth=0.75, relheight=0.90)
+tableBody.place(relx=0.2, rely=0.05, relwidth=0.8, relheight=1)
+scrollableBody = Scrollable(tableBody)
+
+headerLabel = ttk.Label(root, text="Checked Out Books", anchor="center", font=("TkDefaultFont", 16), style="white.TLabel")
+headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.055)
 
 # Add item button
 addItemButton = ttk.Button(root, text="Add Item", command=addItem, takefocus=False)
@@ -837,11 +1011,11 @@ deleteItemButton = ttk.Button(root, text="Delete Item", command=deleteItem, take
 deleteItemButton.place(relx = 0.05, rely = 0.15, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Checkout book button
-checkoutBookButton = ttk.Button(root, text="Checkout Item", command=checkOut, takefocus=False)
+checkoutBookButton = ttk.Button(root, text="Checkout Book", command=checkoutBook, takefocus=False)
 checkoutBookButton.place(relx = 0.05, rely = 0.25, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Return book button
-returnBookButton = ttk.Button(root, text="Return Item", command=returnItem, takefocus=False)
+returnBookButton = ttk.Button(root, text="Return Book", command=returnItem, takefocus=False)
 returnBookButton.place(relx = 0.05, rely = 0.35, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Display all checked out books
@@ -853,6 +1027,10 @@ displayCheckedoutButton.place(relx = 0.05, rely = 0.45, relwidth=BUTTON_REL_WIDT
 # Search Member button
 searchMemberButton = ttk.Button(root, text="Search Member", takefocus=False, command=searchMember)
 searchMemberButton.place(relx = 0.05, rely = 0.55, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
+
+# Search Book button
+searchBookButton = ttk.Button(root, text="Search Book", takefocus=False, command=searchBook)
+searchBookButton.place(relx = 0.05, rely = 0.65, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 
 
