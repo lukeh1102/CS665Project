@@ -354,6 +354,141 @@ def searchMember():
     cancelButton = ttk.Button(searchMemberWindow, text="Cancel", takefocus=False, state="disabled")
     cancelButton.place(relx=0.57, rely=0.6, relwidth=0.15, relheight=0.1)
 
+def deleteItem():
+    
+    def renderDeleteItemWindow():
+
+        def clearMessage(widget):
+            time.sleep(3)
+            widget.config(text="")
+
+        def deleteFromDB():
+            if selectedItem.get() == 1:
+                # delete member
+                newMemberID = memberIDEntry.get()
+
+                confirmLabel = ttk.Label(deleteItemWindow, text="")
+                confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
+
+                #check if entries are empty
+                if newMemberID == "":
+                    confirmLabel.config(text="Please fill out all fields")
+                else:
+                    #delete entry
+                    c.execute("DELETE FROM members WHERE memberID = ?", (newMemberID,))
+                    conn.commit()
+                    
+                    #provide user with a message to confirm entry
+                    confirmLabel.config(text="Member deleted successfully")
+                    #clear message after 3 seconds, needed to open a new thread to count while the GUI still runs
+                    t = threading.Thread(target=clearMessage, args=(confirmLabel,))
+                    t.start()
+
+                    #clear entries
+                    memberIDEntry.delete(0, 'end')
+
+            if selectedItem.get() == 2:
+                # delete book
+                newBookID = bookIDEntry.get()
+
+                confirmLabel = ttk.Label(deleteItemWindow, text="")
+                confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
+
+                #check if entries are empty
+                if newBookID == "":
+                    confirmLabel.config(text="Please fill out all fields")
+                else:
+                    #delete entry
+                    c.execute("DELETE FROM books WHERE bookID = ?", (newBookID,)) 
+                    conn.commit()
+
+                    #provide user with a message to confirm entry
+                    confirmLabel.config(text="Book deleted successfully")
+                    #clear message after 3 seconds, needed to open a new thread to count while the GUI still runs
+                    t = threading.Thread(target=clearMessage, args=(confirmLabel,))
+                    t.start()
+
+                    #clear entries
+                    bookIDEntry.delete(0, 'end')
+
+            if selectedItem.get() == 3:
+                # delete fine
+                newFineID = fineIDEntry.get()
+
+                confirmLabel = ttk.Label(deleteItemWindow, text="")
+                confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
+
+                #check if entries are empty
+                if newFineID == "":
+                    confirmLabel.config(text="Please fill out all fields")
+                else:
+                    #delete entry
+                    c.execute("DELETE FROM fines WHERE fineID = ?", (newFineID,))
+                    conn.commit()
+
+                    #provide user with a message to confirm entry
+                    confirmLabel.config(text="Fine deleted successfully")
+                    #clear message after 3 seconds, needed to open a new thread to count while the GUI still runs
+                    t = threading.Thread(target=clearMessage, args=(confirmLabel,))
+                    t.start()
+                    
+                    #clear entries
+                    fineIDEntry.delete(0, 'end')
+
+        for widget in renderFrame.winfo_children():
+            widget.destroy()
+
+        if selectedItem.get() == 1:
+
+            memberIDLabel = ttk.Label(renderFrame, text="Member ID:", foreground="black", anchor="w")
+            memberIDLabel.place(relx=0.05, rely=0, relwidth=1, relheight=0.1)
+
+            memberIDEntry = ttk.Entry(renderFrame)
+            memberIDEntry.place(relx = 0.05, rely = 0.1, relwidth = 0.8, relheight = 0.15)
+
+        if selectedItem.get() == 2:
+
+            bookIDLabel = ttk.Label(renderFrame, text="Book ID:", foreground="black", anchor="w")
+            bookIDLabel.place(relx=0.05, rely=0, relwidth=1, relheight=0.1)
+
+            bookIDEntry = ttk.Entry(renderFrame)
+            bookIDEntry.place(relx = 0.05, rely = 0.1, relwidth = 0.8, relheight = 0.15)
+
+        if selectedItem.get() == 3:
+
+            fineIDLabel = ttk.Label(renderFrame, text="Fine ID:", foreground="black", anchor="w")
+            fineIDLabel.place(relx=0.05, rely=0, relwidth=1, relheight=0.1)
+
+            fineIDEntry = ttk.Entry(renderFrame)
+            fineIDEntry.place(relx = 0.05, rely = 0.1, relwidth = 0.8, relheight = 0.15)
+
+        deleteButton = ttk.Button(renderFrame, text="Delete", command=deleteFromDB)
+        deleteButton.place(relx=0.4, rely=0.85, relwidth=0.2, relheight=0.1)    
+
+    deleteItemWindow = tk.Toplevel(root)
+    deleteItemWindow.title("Delete Item")
+    deleteItemWindow.resizable(False, False)
+    deleteItemWindow.grab_set()
+    x = (screenWidth/2) - (NEW_WINDOW_WIDTH/2)
+    y = (screenHeight/2) - (NEW_WINDOW_HEIGHT/2)
+    deleteItemWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
+    selectedItem = tk.IntVar()
+
+    radioButtonFrame = ttk.Frame(deleteItemWindow)
+    radioButtonFrame.place(relx=0, rely=0, anchor="nw", relwidth=1, relheight=0.1)
+
+    renderFrame = ttk.Frame(deleteItemWindow)
+    renderFrame.place(relx=0, rely=0.1, anchor="nw", relwidth=1, relheight=0.9)
+
+    memberRB = ttk.Radiobutton(radioButtonFrame, text="Member", variable=selectedItem, value=1, command=renderDeleteItemWindow)
+    memberRB.place(relx=0.1, rely=0.1, relwidth=0.2, relheight=0.8)
+
+    bookRB = ttk.Radiobutton(radioButtonFrame, text="Book", variable=selectedItem, value=2, command=renderDeleteItemWindow)
+    bookRB.place(relx=0.4, rely=0.1, relwidth=0.2, relheight=0.8)
+
+    movieRB = ttk.Radiobutton(radioButtonFrame, text="Fine", variable=selectedItem, value=3, command=renderDeleteItemWindow)
+    movieRB.place(relx=0.7, rely=0.1, relwidth=0.2, relheight=0.8)
+
 def addItem():
 
     def renderAddItemWindow():
@@ -522,7 +657,6 @@ def addItem():
 
         addButton = ttk.Button(renderFrame, text="Add", command=addToDB)
         addButton.place(relx=0.4, rely=0.85, relwidth=0.2, relheight=0.1)
-
 
     addItemWindow = tk.Toplevel(root)
     addItemWindow.title("Add Item")
@@ -699,7 +833,7 @@ addItemButton = ttk.Button(root, text="Add Item", command=addItem, takefocus=Fal
 addItemButton.place(relx = 0.05, rely = 0.05, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Delete item button
-deleteItemButton = ttk.Button(root, text="Delete Item", takefocus=False)
+deleteItemButton = ttk.Button(root, text="Delete Item", command=deleteItem, takefocus=False)
 deleteItemButton.place(relx = 0.05, rely = 0.15, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Checkout book button
