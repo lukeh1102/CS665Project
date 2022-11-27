@@ -165,42 +165,59 @@ def searchBook():
 
         #if entry is empty ask for entry
         if searchBookEntry.get() == "":
+            errorLabel.config(text="Please enter a MemberID")
             return
 
+        #join books and checkouts tables to get book info
+        c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.Book
+        FROM books
+        LEFT JOIN checkouts ON books.BookID = checkouts.Book
+        WHERE books.BookID =?""", (searchBookEntry.get(),))
+
         #join books, authors, and genres tables to get book, title, author, and genre
-        c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, authors.Name, genres.GenreName
-        FROM books 
-        INNER JOIN authors ON books.Author = authors.AuthorID
-        INNER JOIN genres ON books.Genre = genres.GenreID
-        WHERE books.Title LIKE ?""", (searchBookEntry.get(),))
+        # c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, authors.Name, genres.GenreName
+        # FROM books 
+        # INNER JOIN authors ON books.Author = authors.AuthorID
+        # INNER JOIN genres ON books.Genre = genres.GenreID
+        # WHERE books.Title LIKE ?""", (searchBookEntry.get(),))
         bookInfo = c.fetchall()
 
         #if book is not found, display error message
-        if bookInfo == None:
+        if bookInfo == []:
+            #make lavel text red style
+            style = ttk.Style()
+            style.configure("red.TLabel", foreground="red")
+            errorLabel.config(text="Book not found", style="red.TLabel")
             return
+        else:
+            #update entry with book info
+            #make entry modifiable again
+            bookTitleEntry.config(state="normal")
+            #clear entry
+            bookTitleEntry.delete(0, tk.END)
+            #insert new text
+            bookTitleEntry.insert(0, bookInfo[0][1])
+            #make entry unmodifiable
+            bookTitleEntry.config(state="readonly")
 
-        #update entry with book info
-        #make entry modifiable again
-        bookTitleEntry.config(state="normal")
-        #clear entry
-        bookTitleEntry.delete(0, tk.END)
-        #insert new text
-        bookTitleEntry.insert(0, bookInfo[0][0])
-        #make entry unmodifiable
-        bookTitleEntry.config(state="readonly")
+            bookAuthorEntry.config(state="normal")
+            bookAuthorEntry.delete(0, tk.END)
+            bookAuthorEntry.insert(0, bookInfo[0][2])
+            bookAuthorEntry.config(state="readonly")
 
-        bookAuthorEntry.config(state="normal")
-        bookAuthorEntry.delete(0, tk.END)
-        bookAuthorEntry.insert(0, bookInfo[0][1])
-        bookAuthorEntry.config(state="readonly")
+            bookGenreEntry.config(state="normal")
+            bookGenreEntry.delete(0, tk.END)
+            bookGenreEntry.insert(0, bookInfo[0][3])
+            bookGenreEntry.config(state="readonly")
 
-        bookGenreEntry.config(state="normal")
-        bookGenreEntry.delete(0, tk.END)
-        bookGenreEntry.insert(0, bookInfo[0][2])
-        bookGenreEntry.config(state="readonly")
+            #if book is checked out, display return date
+            if bookInfo[0][4] != None:
+                checkedoutStatusLabel.config(text="Checkout Status: Due " + str(bookInfo[0][4]))
+            else:
+                checkedoutStatusLabel.config(text="Checkout Status: Available")
 
-        #make edit button clickable
-        editButton.config(state="normal")
+            #make edit button clickable
+            editButton.config(state="normal")
 
     def editClicked():
 
@@ -234,7 +251,7 @@ def searchBook():
         cancelButton.config(command=cancelClicked)
 
         #make entries unmodifiable
-        searchBookEntry.confid(state="readonly")
+        searchBookEntry.config(state="readonly")
 
         #make entries modifiable
         bookTitleEntry.config(state="normal")
@@ -272,47 +289,56 @@ def searchBook():
 
     #create new window
     searchBookWindow = tk.Toplevel(root)
-    searchBookWindow.resiazable(False, False)
+    searchBookWindow.resizable(False, False)
     searchBookWindow.title("Search Book")
     searchBookWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
 
     #create widgets
+
     searchBookLabel = ttk.Label(searchBookWindow, text="BookID:", anchor="w")
     searchBookLabel.place(relx=0.1, rely=0.04, relwidth=1, relheight=0.05)
 
     searchBookEntry = ttk.Entry(searchBookWindow)
-    searchBookEntry.place(relx=0.1, rely=0.1, relwdith=0.6, relheight=0.1)
+    searchBookEntry.place(relx=0.1, rely=0.1, relwidth=0.6, relheight=0.1)
 
     #widgets to display book info
+
     bookTitleLabel = ttk.Label(searchBookWindow, text="Title:", anchor="sw")
-    bookTitleLabel.place(relx=0.1, rely=0.27, relwdith=0.2, relheight=0.05)
+    bookTitleLabel.place(relx=0.1, rely=0.27, relwidth=0.2, relheight=0.05)
 
     bookTitleEntry = ttk.Entry(searchBookWindow)
     bookTitleEntry.place(relx=0.23, rely=0.25, relwidth=0.67, relheight=0.1)
     bookTitleEntry.config(state="readonly")
 
     bookAuthorLabel = ttk.Label(searchBookWindow, text="Author:", anchor="sw")
-    bookAuthorLabel.place(relx=0.1, rely=0.39, relwdith=0.2, relheight=0.05)
+    bookAuthorLabel.place(relx=0.1, rely=0.39, relwidth=0.2, relheight=0.05)
 
     bookAuthorEntry = ttk.Entry(searchBookWindow)
     bookAuthorEntry.place(relx=0.23, rely=0.37, relwidth=0.67, relheight=0.1)
     bookAuthorEntry.config(state="readonly")
 
     bookGenreLabel = ttk.Label(searchBookWindow, text="Genre:", anchor="sw")
-    bookGenreLabel.place(relx=0.1, rely=0.51, relwdith=0.2, relheight=0.05)
+    bookGenreLabel.place(relx=0.1, rely=0.51, relwidth=0.2, relheight=0.05)
 
     bookGenreEntry = ttk.Entry(searchBookWindow)
     bookGenreEntry.place(relx=0.23, rely=0.49, relwidth=0.67, relheight=0.1)
     bookGenreEntry.config(state="readonly")
 
+    checkedoutStatusLabel = ttk.Label(searchBookWindow, text="Checkout Status:", anchor="w")
+    checkedoutStatusLabel.place(relx=0.1, rely=0.7, relwidth=0.8, relheight=0.1)
+
+    errorLabel = ttk.Label(searchBookWindow, text="")
+    errorLabel.place(relx=0.4, rely=0.85, relwidth=0.5, relheight=0.1)
+
     #buttons
+
     searchBookButton = ttk.Button(searchBookWindow, text="Search", command=searchClicked, takefocus=False)
     searchBookButton.place(relx=0.75, rely=0.1, relwidth=0.15, relheight=0.1)
 
-    editButton = ttk.Button(searchBookWindow, text="Edit", command=editClicked, takefoux=False, state="disabled")
+    editButton = ttk.Button(searchBookWindow, text="Edit", command=editClicked, takefocus=False, state="disabled")
     editButton.place(relx=0.23, rely=0.6, relwidth=0.15, relheight=0.1)
 
-    saveButton = ttk.Button(searchBookWindow, text="Save", command=editClicked, takefoux=False, state="disabled")
+    saveButton = ttk.Button(searchBookWindow, text="Update", command=saveClicked, takefocus=False, state="disabled")
     saveButton.place(relx=0.40, rely=0.6, relwidth=0.15, relheight=0.1)
 
     cancelButton = ttk.Button(searchBookWindow, text="Cancel", takefocus=False, state="disabled")
@@ -325,6 +351,7 @@ def searchMember():
 
         #if entry is empty ask for entry
         if searchMemberEntry.get() == "":
+            errorLabel.config(text="Please enter a MemberID")
             return
 
         #join members, fines, and checkouts tables to get name, address, birthday, books, duedate, and fines
@@ -336,52 +363,57 @@ def searchMember():
         memberInfo = c.fetchall()
 
         # if member is not found, display error message
-        if memberInfo == None:
+        if memberInfo == []:
+            #make lavel text red style
+            style = ttk.Style()
+            style.configure("red.TLabel", foreground="red")
+            errorLabel.config(text="Member not found", style="red.TLabel")
             return
-
-        # update entry with member info
-        # make entry modifable again
-        memberNameEntry.config(state="normal")
-        # clear entry
-        memberNameEntry.delete(0, tk.END)
-        # insert new text
-        memberNameEntry.insert(0, memberInfo[0][0])
-        # make entry unmodifable
-        memberNameEntry.config(state="readonly")
-
-        memberAddressEntry.config(state="normal")
-        memberAddressEntry.delete(0, tk.END)
-        memberAddressEntry.insert(0, memberInfo[0][1])
-        memberAddressEntry.config(state="readonly")
-
-        memberBirthdayEntry.config(state="normal")
-        memberBirthdayEntry.delete(0, tk.END)
-        memberBirthdayEntry.insert(0, memberInfo[0][2])
-        memberBirthdayEntry.config(state="readonly")
-
-        #add up all the fines
-        totalFines = 0
-        for row in memberInfo:
-            if row[5] != None:
-                totalFines += row[5]
-        
-        fineLabel.config(text="Unpaid Fine Amount: $" + str(totalFines))
-
-        #list books checked out
-        checkedOutBooks = ""
-        bookCheckedOut = False
-        for row in memberInfo:
-            if row[3] != None:
-                bookCheckedOut = True
-                checkedOutBooks += str(row[6]) + " Due: " + str(row[4]) + ", "
-        
-        if bookCheckedOut == True:
-            booksLabel.config(text="Checked Out Books: " + checkedOutBooks)
         else:
-            booksLabel.config(text="Checked Out Books: None")
 
-        # make edit button clickable
-        editButton.config(state="normal")
+            # update entry with member info
+            # make entry modifable again
+            memberNameEntry.config(state="normal")
+            # clear entry
+            memberNameEntry.delete(0, tk.END)
+            # insert new text
+            memberNameEntry.insert(0, memberInfo[0][0])
+            # make entry unmodifable
+            memberNameEntry.config(state="readonly")
+
+            memberAddressEntry.config(state="normal")
+            memberAddressEntry.delete(0, tk.END)
+            memberAddressEntry.insert(0, memberInfo[0][1])
+            memberAddressEntry.config(state="readonly")
+
+            memberBirthdayEntry.config(state="normal")
+            memberBirthdayEntry.delete(0, tk.END)
+            memberBirthdayEntry.insert(0, memberInfo[0][2])
+            memberBirthdayEntry.config(state="readonly")
+
+            #add up all the fines
+            totalFines = 0
+            for row in memberInfo:
+                if row[5] != None:
+                    totalFines += row[5]
+        
+            fineLabel.config(text="Unpaid Fine Amount: $" + str(totalFines))
+
+            #list books checked out
+            checkedOutBooks = ""
+            bookCheckedOut = False
+            for row in memberInfo:
+                if row[3] != None:
+                    bookCheckedOut = True
+                    checkedOutBooks += str(row[6]) + " Due: " + str(row[4]) + ", "
+        
+            if bookCheckedOut == True:
+                booksLabel.config(text="Checked Out Books: " + checkedOutBooks)
+            else:
+                booksLabel.config(text="Checked Out Books: None")
+
+            # make edit button clickable
+            editButton.config(state="normal")
 
     def editClicked():
 
@@ -503,6 +535,9 @@ def searchMember():
 
     booksLabel = ttk.Label(searchMemberWindow, text="Books Checked Out:", anchor="nw")
     booksLabel.place(relx=0.1, rely=0.78, relwidth=0.8, relheight=0.2)
+
+    errorLabel = ttk.Label(searchMemberWindow, text="")
+    errorLabel.place(relx=0.4, rely=0.85, relwidth=0.5, relheight=0.1)
 
     #buttons
 
@@ -999,7 +1034,7 @@ tableBody = ttk.Frame(root, style="TFrame")
 tableBody.place(relx=0.2, rely=0.05, relwidth=0.8, relheight=1)
 scrollableBody = Scrollable(tableBody)
 
-headerLabel = ttk.Label(root, text="Checked Out Books", anchor="center", font=("TkDefaultFont", 16), style="white.TLabel")
+headerLabel = ttk.Label(root, text="", anchor="center", font=("TkDefaultFont", 16), style="white.TLabel")
 headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.055)
 
 # Add item button
