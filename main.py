@@ -73,9 +73,13 @@ def displayCheckedout():
     tableBody.place(relx=0.2, rely=0.1, relwidth=0.8, relheight=1)
     scrollableBody = Scrollable(tableBody)
 
-    #get all checked out books
-    c.execute("SELECT * FROM checkouts")
-    checkedOutBooks = c.fetchall()
+    #join checkouts, members, and books tables to get checkout info
+    c.execute("""SELECT checkouts.CheckoutID, checkouts.ReturnDate, members.Name, checkouts.CheckedoutBy, books.Title, books.Author, checkouts.Book
+    FROM checkouts
+    INNER JOIN members ON checkouts.CheckedoutBy = members.MemberID
+    INNER JOIN books ON checkouts.Book = books.BookID""")
+    checkoutInfo = c.fetchall()
+
 
     #display header
     headerLabel = ttk.Label(root, text="Checked Out Books", anchor="center", font=("TkDefaultFont", 16))
@@ -83,20 +87,29 @@ def displayCheckedout():
 
     #display table headers
     checkoutIDLabel = ttk.Label(root, text="Checkout ID", anchor="center")
-    checkoutIDLabel.place(relx=0.2, rely=0.05, relwidth=0.2, relheight=0.05)
+    checkoutIDLabel.place(relx=0.2, rely=0.05, relwidth=0.1, relheight=0.05)
 
-    bookLabel = ttk.Label(root, text="Book ID", anchor="center")
-    bookLabel.place(relx=0.4, rely=0.05, relwidth=0.2, relheight=0.05)
+    bookIDLabel = ttk.Label(root, text="Book ID", anchor="center")
+    bookIDLabel.place(relx=0.31, rely=0.05, relwidth=0.1, relheight=0.05)
 
-    checkedoutByLabel = ttk.Label(root, text="Checked Out By", anchor="center")
-    checkedoutByLabel.place(relx=0.6, rely=0.05, relwidth=0.2, relheight=0.05)
+    bookTitleLabel = ttk.Label(root, text="Book Title", anchor="center")
+    bookTitleLabel.place(relx=0.42, rely=0.05, relwidth=0.1, relheight=0.05)
 
-    dueDateLabel = ttk.Label(root, text="Due Date", anchor="center")
-    dueDateLabel.place(relx=0.8, rely=0.05, relwidth=0.2, relheight=0.05)
+    bookAuthorLabel = ttk.Label(root, text="Book Author", anchor="center")
+    bookAuthorLabel.place(relx=0.53, rely=0.05, relwidth=0.1, relheight=0.05)
+
+    returnDateLabel = ttk.Label(root, text="Return Date", anchor="center")
+    returnDateLabel.place(relx=0.64, rely=0.05, relwidth=0.1, relheight=0.05)
+
+    memberNameLabel = ttk.Label(root, text="Name", anchor="center")
+    memberNameLabel.place(relx=0.75, rely=0.05, relwidth=0.1, relheight=0.05)
+
+    memberIDLabel = ttk.Label(root, text="Member ID", anchor="center")
+    memberIDLabel.place(relx=0.86, rely=0.05, relwidth=0.1, relheight=0.05)
 
     #display all checked out books
     y=0
-    for row in checkedOutBooks:
+    for row in checkoutInfo:
 
         # ttk.Label(scrollableBody, text=row[0]).place(x=0, y=y, width=160, height=50)
         # ttk.Label(scrollableBody, text=row[1]).place(relx=160, y=y, width=160, height=50)
@@ -106,17 +119,26 @@ def displayCheckedout():
         # Had to use trial and error to get the padding right for these
         # I don't think using .place works with scrollableBody
         CheckoutID = ttk.Label(scrollableBody, text=row[0])
-        CheckoutID.grid(row=row[0], column=0, padx=70)
+        CheckoutID.grid(row=row[0], column=0)
 
-        book = ttk.Label(scrollableBody, text=row[1])
-        book.grid(row=row[0], column=1, padx=40)
+        BookID = ttk.Label(scrollableBody, text=row[6])
+        BookID.grid(row=row[0], column=1)
 
-        checkedoutBy = ttk.Label(scrollableBody, text=row[2])
-        checkedoutBy.grid(row=row[0], column=2, padx=30)
+        BookTitle = ttk.Label(scrollableBody, text=row[4])
+        BookTitle.grid(row=row[0], column=2)
 
-        dueDate = ttk.Label(scrollableBody, text=row[3])
-        dueDate.grid(row=row[0], column=3, padx=70)
+        BookAuthor = ttk.Label(scrollableBody, text=row[5])
+        BookAuthor.grid(row=row[0], column=3)
 
+        ReturnDate = ttk.Label(scrollableBody, text=row[1])
+        ReturnDate.grid(row=row[0], column=4)
+
+        MemberName = ttk.Label(scrollableBody, text=row[2])
+        MemberName.grid(row=row[0], column=5)
+
+        MemberID = ttk.Label(scrollableBody, text=row[3])
+        MemberID.grid(row=row[0], column=6)
+        
         #Anytime youre using a scrollable body, you need to call update() for the widgets to appear
         scrollableBody.update()
 
