@@ -537,7 +537,6 @@ def addItem():
 
 #def checkout
 #checkout window (book)
-#book checkout window
 #book ID, member ID, return date (auto generated)
 
 def checkOut():
@@ -589,7 +588,6 @@ def checkOut():
             #clear entries
             memberEntry.delete(0, 'end')
             bookIDEntry.delete(0, 'end')
-            returnDate.delete(0, 'end')
 
     checkOutWindow = tk.Toplevel(root)
     checkOutWindow.title("Check Out Book")
@@ -620,6 +618,65 @@ def checkOut():
     confirmLabel = ttk.Label(renderFrame, text="")
     confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
 
+#def returnItem
+#returnItem window
+#memberID, bookID, return date
+
+def returnItem():
+
+    def clearMessage(widget):
+        time.sleep(3)
+        widget.config(text="")
+
+    def removeFromDB():
+        bookID = bookIDEntry.get()
+        
+        confirmLabel.config(text="")
+        if bookID == "":
+            confirmLabel.config(text="Please fill out all fields")
+        else:
+            #if book is not checked out, return
+            c.execute("SELECT * FROM checkouts WHERE Book = ?", (bookID,))
+            result = c.fetchall()
+            if len(result) == 0:
+                confirmLabel.config(text="Book is not checked out")
+                return
+            
+            #if book is checked out, delete entry
+            c.execute("DELETE FROM checkouts WHERE Book = ?", (bookID,))
+            conn.commit()
+            confirmLabel.config(text="Book has been checked back in")
+
+            t = threading.Thread(target=clearMessage, args=(confirmLabel,))
+            t.start()
+
+            bookIDEntry.delete(0, 'end')
+
+
+    returnWindow = tk.Toplevel(root)
+    returnWindow.title("Check Out Book")
+    returnWindow.resizable(False, False)
+    returnWindow.grab_set()
+    x = (screenWidth/2) - (NEW_WINDOW_WIDTH/2)
+    y = (screenHeight/2) - (NEW_WINDOW_HEIGHT/2)
+    returnWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
+
+    renderFrame = ttk.Frame(returnWindow)
+    renderFrame.place(relx=0, rely=0.1, anchor="nw", relwidth=1, relheight=0.9)
+
+    bookIDLabel = ttk.Label(renderFrame, text="Book ID:", foreground="black", anchor="w")
+    bookIDLabel.place(relx=0.05, rely=0, relwidth=1, relheight=0.1)
+
+    bookIDEntry = ttk.Entry(renderFrame)
+    bookIDEntry.place(relx = 0.05, rely = 0.1, relwidth = 0.8, relheight = 0.15)
+
+    addButton = ttk.Button(renderFrame, text="Add", command=removeFromDB)
+    addButton.place(relx=0.4, rely=0.85, relwidth=0.2, relheight=0.1)
+
+    confirmLabel = ttk.Label(renderFrame, text="")
+    confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
+        
+
 
 # Add item button
 addItemButton = ttk.Button(root, text="Add Item", command=addItem, takefocus=False)
@@ -634,7 +691,7 @@ checkoutBookButton = ttk.Button(root, text="Checkout Item", command=checkOut, ta
 checkoutBookButton.place(relx = 0.05, rely = 0.25, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Return book button
-returnBookButton = ttk.Button(root, text="Return Item", takefocus=False)
+returnBookButton = ttk.Button(root, text="Return Item", command=returnItem, takefocus=False)
 returnBookButton.place(relx = 0.05, rely = 0.35, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Display all checked out books
