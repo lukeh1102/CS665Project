@@ -24,7 +24,7 @@ LEFT JOIN fines ON members.MemberID = fines.IssuedTo
 WHERE members.MemberID = ?, (searchMemberEntry.get(),)
 ```
 
-## List checkedout books
+## List checked out books
 ```sql
 SELECT checkouts.CheckoutID, checkouts.ReturnDate, members.Name, checkouts.CheckedoutBy, books.Title, books.Author, checkouts.Book
 FROM checkouts

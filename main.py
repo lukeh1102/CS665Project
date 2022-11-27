@@ -13,6 +13,7 @@ c = conn.cursor()
 root = tk.Tk()
 root.resizable(False, False)
 root.title("Library Management System - CS665 Project")
+root.configure(background = "#C0C0C0")
 
 # Center Window
 screenWidth = root.winfo_screenwidth()
@@ -41,7 +42,7 @@ class Scrollable(ttk.Frame):
         scrollbar = tk.Scrollbar(frame, width=width)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=False)
 
-        self.canvas = tk.Canvas(frame, yscrollcommand=scrollbar.set)
+        self.canvas = tk.Canvas(frame, yscrollcommand=scrollbar.set, background="white")
         self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         scrollbar.config(command=self.canvas.yview)
@@ -69,46 +70,56 @@ class Scrollable(ttk.Frame):
 
 # Button Functions
 def displayCheckedout():
-    tableBody = ttk.Frame(root)
-    tableBody.place(relx=0.2, rely=0.1, relwidth=0.8, relheight=1)
     scrollableBody = Scrollable(tableBody)
 
     #join checkouts, members, and books tables to get checkout info
-    c.execute("""SELECT checkouts.CheckoutID, checkouts.ReturnDate, members.Name, checkouts.CheckedoutBy, books.Title, books.Author, checkouts.Book
+    c.execute("""SELECT checkouts.CheckoutID, checkouts.Book, books.Title, books.Author, checkouts.ReturnDate, members.Name, checkouts.CheckedoutBy   
     FROM checkouts
     INNER JOIN members ON checkouts.CheckedoutBy = members.MemberID
     INNER JOIN books ON checkouts.Book = books.BookID""")
     checkoutInfo = c.fetchall()
 
+    #make style for label with white background
+    style = ttk.Style()
+    style.configure("white.TLabel", background="white")
 
     #display header
     headerLabel = ttk.Label(root, text="Checked Out Books", anchor="center", font=("TkDefaultFont", 16))
     headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.05)
 
-    #display table headers
-    checkoutIDLabel = ttk.Label(root, text="Checkout ID", anchor="center")
-    checkoutIDLabel.place(relx=0.2, rely=0.05, relwidth=0.1, relheight=0.05)
+     #display table headers
+    checkoutIDLabel = ttk.Label(scrollableBody, text="Checkout ID", anchor="center", style="white.TLabel")
+    # #checkoutIDLabel.place(relx=0.2, rely=0.05, relwidth=0.1, relheight=0.05)
+    checkoutIDLabel.grid(row=0, column=0)
 
-    bookIDLabel = ttk.Label(root, text="Book ID", anchor="center")
-    bookIDLabel.place(relx=0.31, rely=0.05, relwidth=0.1, relheight=0.05)
+    bookIDLabel = ttk.Label(scrollableBody, text="Book ID", anchor="center", style="white.TLabel")
+    # #bookIDLabel.place(relx=0.31, rely=0.05, relwidth=0.1, relheight=0.05)
+    bookIDLabel.grid(row=0, column=1)
 
-    bookTitleLabel = ttk.Label(root, text="Book Title", anchor="center")
-    bookTitleLabel.place(relx=0.42, rely=0.05, relwidth=0.1, relheight=0.05)
+    bookTitleLabel = ttk.Label(scrollableBody, text="Book Title", anchor="center", style="white.TLabel")
+    # #bookTitleLabel.place(relx=0.42, rely=0.05, relwidth=0.1, relheight=0.05)
+    bookTitleLabel.grid(row=0, column=2)
 
-    bookAuthorLabel = ttk.Label(root, text="Book Author", anchor="center")
-    bookAuthorLabel.place(relx=0.53, rely=0.05, relwidth=0.1, relheight=0.05)
+    bookAuthorLabel = ttk.Label(scrollableBody, text="Book Author", anchor="center", style="white.TLabel")
+    # #bookAuthorLabel.place(relx=0.53, rely=0.05, relwidth=0.1, relheight=0.05)
+    bookAuthorLabel.grid(row=0, column=3)
 
-    returnDateLabel = ttk.Label(root, text="Return Date", anchor="center")
-    returnDateLabel.place(relx=0.64, rely=0.05, relwidth=0.1, relheight=0.05)
+    returnDateLabel = ttk.Label(scrollableBody, text="Return Date", anchor="center", style="white.TLabel")
+    # #returnDateLabel.place(relx=0.64, rely=0.05, relwidth=0.1, relheight=0.05)
+    returnDateLabel.grid(row=0, column=4)
 
-    memberNameLabel = ttk.Label(root, text="Name", anchor="center")
-    memberNameLabel.place(relx=0.75, rely=0.05, relwidth=0.1, relheight=0.05)
+    memberNameLabel = ttk.Label(scrollableBody, text="Name", anchor="center", style="white.TLabel")
+    # #memberNameLabel.place(relx=0.75, rely=0.05, relwidth=0.1, relheight=0.05)
+    memberNameLabel.grid(row=0, column=5)
 
-    memberIDLabel = ttk.Label(root, text="Member ID", anchor="center")
-    memberIDLabel.place(relx=0.86, rely=0.05, relwidth=0.1, relheight=0.05)
+    memberIDLabel = ttk.Label(scrollableBody, text="Member ID", anchor="center", style="white.TLabel")
+    # #memberIDLabel.place(relx=0.86, rely=0.05, relwidth=0.1, relheight=0.05)
+    memberIDLabel.grid(row=0, column=6)
+
+    scrollableBody.update()
 
     #display all checked out books
-    y=0
+    y=1
     for row in checkoutInfo:
 
         # ttk.Label(scrollableBody, text=row[0]).place(x=0, y=y, width=160, height=50)
@@ -118,29 +129,31 @@ def displayCheckedout():
 
         # Had to use trial and error to get the padding right for these
         # I don't think using .place works with scrollableBody
-        CheckoutID = ttk.Label(scrollableBody, text=row[0])
-        CheckoutID.grid(row=row[0], column=0)
+        checkoutID = ttk.Label(scrollableBody, text=row[0], style="white.TLabel")
+        checkoutID.grid(row=y, column=0)
 
-        BookID = ttk.Label(scrollableBody, text=row[6])
-        BookID.grid(row=row[0], column=1)
+        bookID = ttk.Label(scrollableBody, text=row[1], style="white.TLabel")
+        bookID.grid(row=y, column=1, padx=0)
 
-        BookTitle = ttk.Label(scrollableBody, text=row[4])
-        BookTitle.grid(row=row[0], column=2)
+        bookTitle = ttk.Label(scrollableBody, text=row[2], style="white.TLabel")
+        bookTitle.grid(row=y, column=2, padx=0)
 
-        BookAuthor = ttk.Label(scrollableBody, text=row[5])
-        BookAuthor.grid(row=row[0], column=3)
+        bookAuthor = ttk.Label(scrollableBody, text=row[3], style="white.TLabel")
+        bookAuthor.grid(row=y, column=3, padx=0)
 
-        ReturnDate = ttk.Label(scrollableBody, text=row[1])
-        ReturnDate.grid(row=row[0], column=4)
+        returnDate = ttk.Label(scrollableBody, text=row[4], style="white.TLabel")
+        returnDate.grid(row=y, column=4, padx=0)
 
-        MemberName = ttk.Label(scrollableBody, text=row[2])
-        MemberName.grid(row=row[0], column=5)
+        memberName = ttk.Label(scrollableBody, text=row[5], style="white.TLabel")
+        memberName.grid(row=y, column=5, padx=0)
 
-        MemberID = ttk.Label(scrollableBody, text=row[3])
-        MemberID.grid(row=row[0], column=6)
+        memberID = ttk.Label(scrollableBody, text=row[6], style="white.TLabel")
+        memberID.grid(row=y, column=6, padx=0)
         
         #Anytime youre using a scrollable body, you need to call update() for the widgets to appear
         scrollableBody.update()
+
+        y+=1
 
 def searchMember():
 
@@ -151,12 +164,12 @@ def searchMember():
             return
 
         #join members, fines, and checkouts tables to get name, address, birthday, books, duedate, and fines
-        c.execute("""SELECT members.Name, members.Address, members.Birthday, checkouts.Book, checkouts.Returndate, fines.FineAmount 
+        c.execute("""SELECT members.Name, members.Address, members.Birthday, checkouts.Book, checkouts.Returndate, fines.FineAmount, books.Title, fines.IssuedTo
         FROM members LEFT JOIN checkouts ON members.MemberID = checkouts.CheckedoutBy 
         LEFT JOIN fines ON members.MemberID = fines.IssuedTo 
+        LEFT JOIN books ON checkouts.Book = books.BookID
         WHERE members.MemberID = ?""", (searchMemberEntry.get(),))
         memberInfo = c.fetchall()
-        print(memberInfo)
 
         # if member is not found, display error message
         if memberInfo == None:
@@ -196,7 +209,7 @@ def searchMember():
         for row in memberInfo:
             if row[3] != None:
                 bookCheckedOut = True
-                checkedOutBooks += row[3] + " Due: " + str(row[4]) + ", "
+                checkedOutBooks += str(row[6]) + " Due: " + str(row[4]) + ", "
         
         if bookCheckedOut == True:
             booksLabel.config(text="Checked Out Books: " + checkedOutBooks)
@@ -535,7 +548,10 @@ def addItem():
     movieRB = ttk.Radiobutton(radioButtonFrame, text="Fine", variable=selectedItem, value=3, command=renderAddItemWindow)
     movieRB.place(relx=0.7, rely=0.1, relwidth=0.2, relheight=0.8)
 
+s=ttk.Style().configure("TFrame", background="white")
 
+tableBody = ttk.Frame(root, style="TFrame")
+tableBody.place(relx=0.2, rely=0.05, relwidth=0.75, relheight=0.90)
 
 # Add item button
 addItemButton = ttk.Button(root, text="Add Item", command=addItem, takefocus=False)
