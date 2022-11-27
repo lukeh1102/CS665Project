@@ -23,6 +23,12 @@ LEFT JOIN checkouts ON members.MemberID = checkouts.CheckedoutBy
 LEFT JOIN fines ON members.MemberID = fines.IssuedTo 
 WHERE members.MemberID = ?, (searchMemberEntry.get(),)
 ```
+```sql
+SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.Book
+FROM books
+LEFT JOIN checkouts ON books.BookID = checkouts.Book
+WHERE books.BookID = ?, (searchBookEntry.get(),)
+```
 
 ## List checked out books
 ```sql
@@ -38,5 +44,18 @@ INNER JOIN books ON checkouts.Book = books.BookID
 UPDATE members SET Name = ?, Address = ?, Birthday = ? 
 WHERE MemberID = ?, (newName, newAddress, newBirthday, memberID)
 ```
+```sql
+UPDATE books SET Title = ?, Author = ?, Genre = ? WHERE BookID = ?, (newTitle, newAuthor, newGenre, bookID)
+```
 
 # Delete
+## Delete itms
+```sql
+DELETE FROM fines WHERE fineID = ?, (newFineID,)
+```
+```sql
+DELETE FROM books WHERE bookID = ?, (newBookID,)
+```
+```sql
+DELETE FROM members WHERE memberID = ?, (newMemberID,)
+```
