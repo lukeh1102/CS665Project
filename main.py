@@ -69,7 +69,13 @@ class Scrollable(ttk.Frame):
         self.canvas.config(scrollregion=self.canvas.bbox(self.windows_item))
 
 # Button Functions
-def displayCheckedout():
+def displayCheckedout(tableBody, scrollableBody):
+
+    tableBody.destroy()
+    scrollableBody.destroy()
+    tableBody = ttk.Frame(root, style="TFrame")
+    tableBody.place(relx=0.2, rely=0.05, relwidth=0.8, relheight=1)
+    scrollableBody = Scrollable(tableBody)
 
 
     #join checkouts, members, and books tables to get checkout info
@@ -110,28 +116,21 @@ def displayCheckedout():
 
     returnDateLabel = ttk.Label(scrollableBody, text="Return Date", anchor="center", style="white.TLabel")
     # #returnDateLabel.place(relx=0.64, rely=0.05, relwidth=0.1, relheight=0.05)
-    returnDateLabel.grid(row=0, column=4)
+    returnDateLabel.grid(row=0, column=4, padx=10)
 
     memberNameLabel = ttk.Label(scrollableBody, text="Name", anchor="center", style="white.TLabel")
     # #memberNameLabel.place(relx=0.75, rely=0.05, relwidth=0.1, relheight=0.05)
-    memberNameLabel.grid(row=0, column=5)
+    memberNameLabel.grid(row=0, column=5, padx=10)
 
     memberIDLabel = ttk.Label(scrollableBody, text="Member ID", anchor="center", style="white.TLabel")
     # #memberIDLabel.place(relx=0.86, rely=0.05, relwidth=0.1, relheight=0.05)
-    memberIDLabel.grid(row=0, column=6)
+    memberIDLabel.grid(row=0, column=6, padx=10)
 
     scrollableBody.update()
 
     #display all checked out books
     y=1
     for row in checkoutInfo:
-
-        # ttk.Label(scrollableBody, text=row[0]).place(x=0, y=y, width=160, height=50)
-        # ttk.Label(scrollableBody, text=row[1]).place(relx=160, y=y, width=160, height=50)
-        # ttk.Label(scrollableBody, text=row[2]).place(relx=320, y=y, width=160, height=50)
-        # ttk.Label(scrollableBody, text=row[3]).place(relx=480, y=y, width=160, height=50)
-
-        # Had to use trial and error to get the padding right for these
         # I don't think using .place works with scrollableBody
         checkoutID = ttk.Label(scrollableBody, text=row[0], style="white.TLabel")
         checkoutID.grid(row=y, column=0)
@@ -146,19 +145,222 @@ def displayCheckedout():
         bookAuthor.grid(row=y, column=3, padx=0)
 
         returnDate = ttk.Label(scrollableBody, text=row[4], style="white.TLabel")
-        returnDate.grid(row=y, column=4, padx=0)
+        returnDate.grid(row=y, column=4, padx=10)
 
         memberName = ttk.Label(scrollableBody, text=row[5], style="white.TLabel")
-        memberName.grid(row=y, column=5, padx=0)
+        memberName.grid(row=y, column=5, padx=10)
 
         memberID = ttk.Label(scrollableBody, text=row[6], style="white.TLabel")
-        memberID.grid(row=y, column=6, padx=0)
+        memberID.grid(row=y, column=6, padx=10)
         
         #Anytime youre using a scrollable body, you need to call update() for the widgets to appear
         scrollableBody.update()
 
         y+=1
+
+def browseGenre(tableBody, scrollableBody):
+
+    def rbSelected(event):
+        genre = genreVar.get()
+
+        if genre == "Fiction":
+            #join checkouts and books tables to get return date and fiction book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Fiction" """)
+            bookInfo = c.fetchall()
+        elif genre == "Non-Fiction":
+            #join checkouts and books tables to get return date and non-fiction book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Non-Fiction" """)
+            bookInfo = c.fetchall()
+        elif genre == "Mystery":
+            #join checkouts and books tables to get return date and mystery book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Mystery" """)
+            bookInfo = c.fetchall()
+        elif genre == "Fantasy":
+            #join checkouts and books tables to get return date and fantasy book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Fantasy" """)
+            bookInfo = c.fetchall()
+        elif genre == "Sci-Fi":
+            #join checkouts and books tables to get return date and sci-fi book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Science Fiction" """)
+            bookInfo = c.fetchall()
+        elif genre == "Romance":
+            #join checkouts and books tables to get return date and romance book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Romance" """)
+            bookInfo = c.fetchall()
+        elif genre == "Horror":
+            #join checkouts and books tables to get return date and horror book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Horror" """)
+            bookInfo = c.fetchall()
+        elif genre == "Biography":
+            #join checkouts and books tables to get return date and biography book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "Biography" """)
+            bookInfo = c.fetchall()
+        elif genre == "History":
+            #join checkouts and books tables to get return date and history book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book
+            WHERE books.Genre = "History" """)
+            bookInfo = c.fetchall()
         
+        #delete old widgets in scrollableBody
+        for widget in scrollableBody.winfo_children():
+            widget.destroy()
+        scrollableBody.update()
+
+        #display table headers
+        bookIDLabel = ttk.Label(scrollableBody, text="Book ID", anchor="center", style="white.TLabel")
+        bookIDLabel.grid(row=0, column=0, padx=20)
+
+        bookTitleLabel = ttk.Label(scrollableBody, text="Book Title", anchor="center", style="white.TLabel")
+        bookTitleLabel.grid(row=0, column=1, padx=20)
+
+        bookAuthorLabel = ttk.Label(scrollableBody, text="Book Author", anchor="center", style="white.TLabel")
+        bookAuthorLabel.grid(row=0, column=2, padx=20)
+
+        bookGenreLabel = ttk.Label(scrollableBody, text="Book Genre", anchor="center", style="white.TLabel")
+        bookGenreLabel.grid(row=0, column=3, padx=20)
+
+        returnDateLabel = ttk.Label(scrollableBody, text="Return Date", anchor="center", style="white.TLabel")
+        returnDateLabel.grid(row=0, column=4, padx=20)
+
+        #display all books
+        y=1
+        for row in bookInfo:
+            bookIDLabel = ttk.Label(scrollableBody, text=row[0], style="white.TLabel")
+            bookIDLabel.grid(row=y, column=0, padx=20)
+
+            bookTitleLabel = ttk.Label(scrollableBody, text=row[1], style="white.TLabel")
+            bookTitleLabel.grid(row=y, column=1, padx=20)
+
+            bookAuthorLabel = ttk.Label(scrollableBody, text=row[2], style="white.TLabel")
+            bookAuthorLabel.grid(row=y, column=2, padx=20)
+
+            bookGenreLabel = ttk.Label(scrollableBody, text=row[3], style="white.TLabel")
+            bookGenreLabel.grid(row=y, column=3, padx=20)
+
+            if row[4] == None:
+                returnDateLabel = ttk.Label(scrollableBody, text="Available", style="white.TLabel")
+                returnDateLabel.grid(row=y, column=4, padx=20)
+            else:
+                returnDateLabel = ttk.Label(scrollableBody, text=row[4], style="white.TLabel")
+                returnDateLabel.grid(row=y, column=4, padx=20)
+
+            scrollableBody.update()
+
+            y+=1
+
+        print(bookInfo)
+        if bookInfo == []:
+            noBooksLabel = ttk.Label(scrollableBody, text="No books found", style="white.TLabel")
+            noBooksLabel.grid(row=1, column=0)
+            scrollableBody.update()
+
+
+    tableBody.destroy()
+    scrollableBody.destroy()
+    tableBody = ttk.Frame(root, style="TFrame")
+    tableBody.place(relx=0.2, rely=0.1, relwidth=0.8, relheight=1)
+    scrollableBody = Scrollable(tableBody)
+    
+    headerLabel.config(text="Browse Books by Genre")
+
+    #radio button frame
+    boxFrame = ttk.Frame(root, style="TFrame")
+    boxFrame.place(relx=0.2, rely=0.05, relwidth=0.8, relheight=0.05)
+
+    style = ttk.Style()
+    style.configure("white.TLabel", background="white")
+        
+    #join checkouts and books tables to get return date and all book id, book title, and book author
+    c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+    FROM books
+    LEFT JOIN checkouts ON books.BookID = checkouts.Book""")
+    bookInfo = c.fetchall()
+
+    #delete old widgets in scrollableBody
+    for widget in scrollableBody.winfo_children():
+        widget.destroy()
+    scrollableBody.update()
+
+    #display table headers
+    bookIDLabel = ttk.Label(scrollableBody, text="Book ID", anchor="center", style="white.TLabel")
+    bookIDLabel.grid(row=0, column=0, padx=20)
+
+    bookTitleLabel = ttk.Label(scrollableBody, text="Book Title", anchor="center", style="white.TLabel")
+    bookTitleLabel.grid(row=0, column=1, padx=20)
+
+    bookAuthorLabel = ttk.Label(scrollableBody, text="Book Author", anchor="center", style="white.TLabel")
+    bookAuthorLabel.grid(row=0, column=2, padx=20)
+
+    bookGenreLabel = ttk.Label(scrollableBody, text="Book Genre", anchor="center", style="white.TLabel")
+    bookGenreLabel.grid(row=0, column=3, padx=20)
+
+    returnDateLabel = ttk.Label(scrollableBody, text="Return Date", anchor="center", style="white.TLabel")
+    returnDateLabel.grid(row=0, column=4, padx=20)
+
+    y=1
+    for row in bookInfo:
+        bookIDLabel = ttk.Label(scrollableBody, text=row[0], style="white.TLabel")
+        bookIDLabel.grid(row=y, column=0, padx=20)
+
+        bookTitleLabel = ttk.Label(scrollableBody, text=row[1], style="white.TLabel")
+        bookTitleLabel.grid(row=y, column=1, padx=20)
+
+        bookAuthorLabel = ttk.Label(scrollableBody, text=row[2], style="white.TLabel")
+        bookAuthorLabel.grid(row=y, column=2, padx=20)
+
+        bookGenreLabel = ttk.Label(scrollableBody, text=row[3], style="white.TLabel")
+        bookGenreLabel.grid(row=y, column=3, padx=20)
+
+        if row[4] == None:
+            returnDateLabel = ttk.Label(scrollableBody, text="Available", style="white.TLabel")
+            returnDateLabel.grid(row=y, column=4)
+        else:
+            returnDateLabel = ttk.Label(scrollableBody, text=row[4], style="white.TLabel")
+            returnDateLabel.grid(row=y, column=4)
+
+        scrollableBody.update()
+
+        y+=1
+
+    #Combo Box
+    genreVar = tk.StringVar()
+    genreVar.set("All")
+
+    genreBox = ttk.Combobox(boxFrame, textvariable=genreVar)
+    genreBox["values"] = ("All", "Fiction", "Non-Fiction", "Mystery", "Fantasy", "Sci-Fi", "Romance", "Horror", "Biography", "History")
+    genreBox.current(0)
+    genreBox.place(relx=0.4, rely=0.1, relwidth=0.2, relheight=0.8)
+
+    # when a genre is selected, display all books in that genre
+    genreBox.bind("<<ComboboxSelected>>", rbSelected)
+
+
 def searchBook():
 
     def searchClicked():
@@ -291,6 +493,7 @@ def searchBook():
     searchBookWindow = tk.Toplevel(root)
     searchBookWindow.resizable(False, False)
     searchBookWindow.title("Search Book")
+    searchBookWindow.grab_set()
     searchBookWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
 
     #create widgets
@@ -442,7 +645,6 @@ def searchMember():
             cancelButton.config(state="disabled")
 
 
-
         #make save button clickable
         saveButton.config(state="normal")
 
@@ -489,13 +691,12 @@ def searchMember():
         saveButton.config(state="disabled")
         cancelButton.config(state="disabled")
 
-    
-
 
     #create new window
     searchMemberWindow = tk.Toplevel(root)
     searchMemberWindow.resizable(False, False)
     searchMemberWindow.title("Search Member")
+    searchMemberWindow.grab_set()
     searchMemberWindow.geometry('%dx%d+%d+%d' % (NEW_WINDOW_WIDTH, NEW_WINDOW_HEIGHT, x, y))
 
     #create widgets
@@ -782,21 +983,6 @@ def addItem():
                     amountEntry.delete(0, 'end')
 
 
-                
-
-                #check if name is already in db
-                #Forgot name is not actually unique, but we'll need this code later for other tables so I'm commenting it out for now
-                # c.execute("SELECT Name FROM members WHERE Name = ?", (newName,))
-                # if c.fetchone() is not None:
-                #     nameLabel.config(text="Name already in database", foreground="red")
-                # else:
-                #     c.execute("INSERT INTO members (Name, Address, Birthday) VALUES (?, ?, ?)", (newName, newAddress, newBirthday))
-                #     conn.commit()
-
-                #     nameLabel.config(text="Name", foreground="black")
-                #     confirmLabel = ttk.Label(addItemWindow, text="Member Added")
-                #     confirmLabel.place(relx=0.4, rely=0.65, relwidth=0.2, relheight=0.15)
-
         for widget in renderFrame.winfo_children():
             widget.destroy()
 
@@ -884,9 +1070,6 @@ def addItem():
     movieRB = ttk.Radiobutton(radioButtonFrame, text="Fine", variable=selectedItem, value=3, command=renderAddItemWindow)
     movieRB.place(relx=0.7, rely=0.1, relwidth=0.2, relheight=0.8)
 
-#def checkout
-#checkout window (book)
-#book ID, member ID, return date (auto generated)
 
 def checkoutBook():
     
@@ -970,11 +1153,8 @@ def checkoutBook():
     confirmLabel = ttk.Label(renderFrame, text="")
     confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
 
-#def returnItem
-#returnItem window
-#memberID, bookID, return date
 
-def returnItem():
+def returnBook():
 
     def clearMessage(widget):
         time.sleep(3)
@@ -1029,13 +1209,14 @@ def returnItem():
     confirmLabel = ttk.Label(renderFrame, text="")
     confirmLabel.place(rely=0.775, relwidth=1, relheight=0.1)
 
+
+headerLabel = ttk.Label(root, text="", anchor="center", font=("TkDefaultFont", 16), style="white.TLabel")
+headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.055)
+
 s=ttk.Style().configure("TFrame", background="white")
 tableBody = ttk.Frame(root, style="TFrame")
 tableBody.place(relx=0.2, rely=0.05, relwidth=0.8, relheight=1)
 scrollableBody = Scrollable(tableBody)
-
-headerLabel = ttk.Label(root, text="", anchor="center", font=("TkDefaultFont", 16), style="white.TLabel")
-headerLabel.place(relx=0.2, rely=0, relwidth=0.8, relheight=0.055)
 
 # Add item button
 addItemButton = ttk.Button(root, text="Add Item", command=addItem, takefocus=False)
@@ -1050,13 +1231,13 @@ checkoutBookButton = ttk.Button(root, text="Checkout Book", command=checkoutBook
 checkoutBookButton.place(relx = 0.05, rely = 0.25, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Return book button
-returnBookButton = ttk.Button(root, text="Return Book", command=returnItem, takefocus=False)
+returnBookButton = ttk.Button(root, text="Return Book", command=returnBook, takefocus=False)
 returnBookButton.place(relx = 0.05, rely = 0.35, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Display all checked out books
 s = ttk.Style()
 s.configure('my.TButton', font=("TkDefaultFont", 8))
-displayCheckedoutButton = ttk.Button(root, text="Checked Out List", command=displayCheckedout, style='my.TButton', takefocus=False)
+displayCheckedoutButton = ttk.Button(root, text="Checked Out List", command=lambda: displayCheckedout(tableBody, scrollableBody), style='my.TButton', takefocus=False)
 displayCheckedoutButton.place(relx = 0.05, rely = 0.45, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 # Search Member button
@@ -1067,15 +1248,8 @@ searchMemberButton.place(relx = 0.05, rely = 0.55, relwidth=BUTTON_REL_WIDTH, re
 searchBookButton = ttk.Button(root, text="Search Book", takefocus=False, command=searchBook)
 searchBookButton.place(relx = 0.05, rely = 0.65, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
-
-
-
-#TODO 
-# Buttons for searching for items
-# Buttons for other pre-defined queries
-# Buttons for filling table
-
-
+displayCheckedoutButton = ttk.Button(root, text="Browse By Genre", command=lambda: browseGenre(tableBody, scrollableBody), style='my.TButton', takefocus=False)
+displayCheckedoutButton.place(relx = 0.05, rely = 0.75, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 
 
