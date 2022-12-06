@@ -226,6 +226,13 @@ def browseGenre(tableBody, scrollableBody):
             LEFT JOIN checkouts ON books.BookID = checkouts.Book
             WHERE books.Genre = "History" """)
             bookInfo = c.fetchall()
+        elif genre == "All":
+            #join checkouts and books tables to get return date and all book id, book title, and book author
+            c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, checkouts.ReturnDate, checkouts.book
+            FROM books
+            LEFT JOIN checkouts ON books.BookID = checkouts.Book""")
+            bookInfo = c.fetchall()
+            
         
         #delete old widgets in scrollableBody
         for widget in scrollableBody.winfo_children():
@@ -376,12 +383,6 @@ def searchBook():
         LEFT JOIN checkouts ON books.BookID = checkouts.Book
         WHERE books.BookID =?""", (searchBookEntry.get(),))
 
-        #join books, authors, and genres tables to get book, title, author, and genre
-        # c.execute("""SELECT books.BookID, books.Title, books.Author, books.Genre, authors.Name, genres.GenreName
-        # FROM books 
-        # INNER JOIN authors ON books.Author = authors.AuthorID
-        # INNER JOIN genres ON books.Genre = genres.GenreID
-        # WHERE books.Title LIKE ?""", (searchBookEntry.get(),))
         bookInfo = c.fetchall()
 
         #if book is not found, display error message
@@ -439,7 +440,7 @@ def searchBook():
             bookGenreEntry.config(state="readonly")
 
             #make search entry modifiable
-            searchBookEntry.confi(state="normal")
+            searchBookEntry.config(state="normal")
                 
             #make save and cancel buttons unclickable
             saveButton.config(state="disabled")
@@ -1147,7 +1148,7 @@ def checkoutBook():
     memberEntry = ttk.Entry(renderFrame)
     memberEntry.place(relx = 0.05, rely = 0.35, relwidth = 0.8, relheight = 0.15)
 
-    addButton = ttk.Button(renderFrame, text="Add", command=addToDB)
+    addButton = ttk.Button(renderFrame, text="Checkout", command=addToDB)
     addButton.place(relx=0.4, rely=0.85, relwidth=0.2, relheight=0.1)
 
     confirmLabel = ttk.Label(renderFrame, text="")
@@ -1203,7 +1204,7 @@ def returnBook():
     bookIDEntry = ttk.Entry(renderFrame)
     bookIDEntry.place(relx = 0.05, rely = 0.1, relwidth = 0.8, relheight = 0.15)
 
-    addButton = ttk.Button(renderFrame, text="Add", command=removeFromDB)
+    addButton = ttk.Button(renderFrame, text="Return", command=removeFromDB)
     addButton.place(relx=0.4, rely=0.85, relwidth=0.2, relheight=0.1)
 
     confirmLabel = ttk.Label(renderFrame, text="")
@@ -1248,7 +1249,7 @@ searchMemberButton.place(relx = 0.05, rely = 0.55, relwidth=BUTTON_REL_WIDTH, re
 searchBookButton = ttk.Button(root, text="Search Book", takefocus=False, command=searchBook)
 searchBookButton.place(relx = 0.05, rely = 0.65, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
-displayCheckedoutButton = ttk.Button(root, text="Browse By Genre", command=lambda: browseGenre(tableBody, scrollableBody), style='my.TButton', takefocus=False)
+displayCheckedoutButton = ttk.Button(root, text="Browse Books", command=lambda: browseGenre(tableBody, scrollableBody), style='my.TButton', takefocus=False)
 displayCheckedoutButton.place(relx = 0.05, rely = 0.75, relwidth=BUTTON_REL_WIDTH, relheight=BUTTON_REL_HEIGHT)
 
 

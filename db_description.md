@@ -18,35 +18,27 @@ Fines(FineID, IssuedTo, FineAmount, DateIssued)
 ## Members
 | MemberID |       Name        |   Address    |  Birthday  |
 | :------: | :---------------: | :----------: | :--------: |
-| F837M338 | Jennifer Siviseth | 111 Rocky Rd | 01/19/2001 |
-| B843K735 |    Luke Walker    | 123 Easy St  | 11/02/2000 |
+|    1     | Jennifer Siviseth | 111 Rocky Rd | 01/19/2001 |
+|    2     |    Luke Walker    | 123 Easy St  | 11/02/2000 |
 
 ## Books
 | BookID |       Title       |       Author        |  Genre  |
 | :----: | :---------------: | :-----------------: | :-----: |
-|  B123  | Lord of The Rings |    J.R.R Tolkien    | Fantasy |
-|  B456  |      Eragon       | Chirstopher Paolini | Fantasy |
+|   1    | Lord of The Rings |    J.R.R Tolkien    | Fantasy |
+|   2    |      Eragon       | Chirstopher Paolini | Fantasy |
 
 
 ## CheckoutList
 | CheckoutID | Book  | CheckedoutBy | ReturnDate |
 | :--------: | :---: | :----------: | :--------: |
-|   C20576   | B123  |   F234J457   | 11/29/2022 |
-|   C67219   | B456  |   B843K735   | 11/23/2022 |
+|     1      | B123  |   F234J457   | 11/29/2022 |
+|     2      | B456  |   B843K735   | 11/23/2022 |
 
 ## Fines
 | FineID | IssuedTo | FineAmount | DateIssued |
 | :----: | :------: | :--------: | :--------: |
-|  F234  | F839G234 |     5      |  11/12/22  |
-| F32412 | L239P238 |     15     |  11/23/22  |
-
-
-## Waitlist
-| RequestID |    Title    | MemberID | DateRequested |
-| :-------: | :---------: | :------: | :-----------: |
-|  R11111   | Animal Farm | A924Y539 |  11/17/2022   |
-|  R22222   | Enders Game | G347T259 |  11/23/2022   |
- 
+|   1    | F839G234 |     5      |  11/12/22  |
+|   2    | L239P238 |     15     |  11/23/22  |
 
 # FD's
 ## Members 
@@ -61,7 +53,7 @@ Fines(FineID, IssuedTo, FineAmount, DateIssued)
     CheckoutID->Book
     CheckoutID->CheckedoutBy
     CheckoutID->ReturnDate
-## Waitlist
+## Fines
     FineID->IssuedTo
     FineID->FineAmount
     FineID->DateIssued
